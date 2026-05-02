@@ -1,0 +1,42 @@
+class BankAccount {
+    int balance = 10000000;
+
+    public void withdraw(int amount) {
+        balance = balance - amount;  // NOT thread-safe 
+    }
+
+    public int getBalance() {
+        return balance;
+    }
+}
+
+class Worker extends Thread {
+    BankAccount account;
+
+    public Worker(BankAccount account) {
+        this.account = account;
+    }
+
+    public void run() {
+        account.withdraw(1000);
+    }
+}
+
+public class WithoutSync {
+    public static void main(String[] args) throws InterruptedException {
+
+        BankAccount account = new BankAccount();
+        Thread[] workers = new Thread[1000];
+
+        for (int i = 0; i < 1000; i++) {
+            workers[i] = new Worker(account);
+            workers[i].start();
+        }
+
+        for (int i = 0; i < 1000; i++) {
+            workers[i].join();
+        }
+
+        System.out.println("Final Balance (Without Sync): " + account.getBalance());
+    }
+}
